@@ -1,0 +1,38 @@
+<li class="flexrow">
+
+    <div>
+        <h2 style="text-align: center;"><span> {{currentDay}}  of {{currentMonth}}, {{currentYear}} {{currentEra}}</span><br>
+          <label for="file"><small> {{currentClickName}}</small></label>
+          <small><progress id="file" max="{{ticksPerClick}}" value="{{ticks}}"> </progress> <span style="color:grey">⧖ {{ticks}} / {{ticksPerClick}}</span></small>
+        </h2>
+        
+        <span class="indicator">⬇</span>
+
+        <ul class="circle" style="transform: rotate({{rotation}}deg)">
+            {{#each allClicks}}
+              {{#isLessThan @index ../currentClickIndex }}
+              <li>
+                <div class="text disabled">{{ this }}</div>
+              </li>
+              {{else}}
+              <li>
+                <div class="text">{{ this }}</div>
+              </li>
+              {{/isLessThan }}
+            {{/each}}
+        <ul>
+    </div>
+
+    <div style="overflow: scroll;">
+          {{#each currentJournalEntries}}
+          <h3>{{this.icon}} {{this.phaseName}}</h3>
+          <ul>
+            {{#each this.journals}}
+              <li>{{this.user}} - {{this.type}}<br>
+              <blockquote>{{this.content}}</blockquote></li>
+            {{/each}}
+          </ul>
+          {{/each}}
+    </div>
+    
+</li>
