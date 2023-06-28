@@ -8,7 +8,7 @@ export class TimeKeeper {
             return accumulator + object.clicks.length
         }, 0);
 
-        // State
+        // Load the state from settings
         this.currentTicks = game.settings.get('vtt-timekeeper', 'currentTicks');
         this.currentClicks = game.settings.get('vtt-timekeeper', 'currentClicks');
         this.paused = game.paused;
@@ -42,7 +42,6 @@ export class TimeKeeper {
         this.allMonths = this.calendar.months.reduce(function(accumulator, object) {
             return accumulator.concat(object.monthName);
         }, []);
-        
         this.clicksPerMonth = this.clicksPerYear / this.allMonths.length;
 
     }
@@ -57,6 +56,7 @@ export class TimeKeeper {
         if (!this.paused) {
             this.currentTicks += 1;
             game.settings.set('vtt-timekeeper', 'currentTicks', this.currentTicks)
+            game.settings.set('vtt-timekeeper', 'currentClicks', this.currentClicks);
         }
 
         // Add a click (and reset ticks) if currentTicks = ticksPerClick
@@ -76,87 +76,125 @@ export class TimeKeeper {
         Hooks.call('vtt-timekeeper.tick', this);
     }
 
+    // Pause the timekeeper
     pause() {
         this.paused = true;
     }
 
+    // Resume the timekeeper
     resume() {
         this.paused = false;
     }
 
+    // Get the current rotation of the main clock
     getRotation() {
         return this.currentRotation;
     }
 
+    // Get the current number of ticks
     getTicks() {
         return this.currentTicks;
     }
 
+    // Get the number of ticks per click
     getTicksPerClick() {
         return this.ticksPerClick;
     }
 
+    // Get the number of clicks in the current day
     getCurrentClicks() {
         return this.currentClicks;
     }
 
+    // Get all the clicks in the current day
     getAllClicks() {
         return this.allClicks;
     }
 
+    // Update the rotation of the main clock
     _updateRotation() {
         return -(((this.currentClicks % this.clicksPerDay) * this.ticksPerClick) + (this.currentTicks)) / (this.ticksPerClick * this.clicksPerDay) * 360;
     }
 
+    // Set the calendar
     setCalendar(calendar) {
         this.calendar = calendar;
     }
 
+    // Get all the phases from the calendar
     getPhases() {
         return this.calendar.phases;
     }
 
+    // Get the calendar data
     getCalendar() {
         return this.calendar;
     }
 
+    // Get the current phase name
     getCurrentPhaseName() {
-        let phaseIndex = Math.round((((this.startingClicks + this.currentClicks) % this.clicksPerDay) / this.calendar.phases.length)) - 1;
+        let phaseIndex = Math.ceil((this.getCurrentClickIndex() / this.getAllClicks().length) * this.getPhases().length) - 1;
         return this.calendar.phases[phaseIndex].phaseName;
     }
 
+    // Get the current era
     getCurrentEra() {
         return this.currentEra;
     }
 
+    // Get the months of the calendar
     getCalendarMonths() {
         return this.calendar.months;
     }
 
+    // Get the current year
     getCurrentYear() {      
         return Math.round((this.startingClicks + this.currentClicks) / this.clicksPerYear);
     }
 
+    // Get the current month
     getCurrentMonth() {
         return this.allMonths[Math.round((((this.startingClicks + this.currentClicks) % this.clicksPerYear) / this.clicksPerYear) * this.allMonths.length)]
     }
 
+    // Get the current day
     getCurrentDay() {
         return Math.round((((this.startingClicks + this.currentClicks) % this.clicksPerYear / this.clicksPerYear) * this.totalDaysPerYear) % (this.totalDaysPerYear / this.allMonths.length)) + 1
     }
 
+    // Get the current day as an orindal
     getCurrentDayAsOrdinal() {
         return this._getOrdinal(this.getCurrentDay())
     }
 
+    // Get the index of the current click
     getCurrentClickIndex() {
         return (this.startingClicks + this.currentClicks) % this.clicksPerDay;
     }
 
+    // Get the current click name
     getCurrentClickName() {
         return this.allClicks[(this.startingClicks + this.currentClicks) % this.clicksPerDay];
     }
 
+    // Advance the gametime to a specified click
+    advanceToClick(clickIndex) {
+        // Get the difference between the current click and the proposed click
+        let clickDifference = Math.abs(this.getCurrentClickIndex() - clickIndex);
+
+        // Reset ticks to 0
+        this.currentTicks = 0;
+        this.currentClicks = this.currentClicks + clickDifference;
+    }
+
+    // Advance to the next day
+    advanceToNextDay() {
+        this.currentTicks = 0;
+        this.currentClicks += this.allClicks.length - this.getCurrentClickIndex();
+        
+    }
+
+    // Convert a number into an ordinal
     _getOrdinal(number) {
         var s = ["th", "st", "nd", "rd"];
         var v = number % 100;

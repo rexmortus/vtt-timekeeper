@@ -16,6 +16,8 @@ export class JournalKeeper {
             phase['journals'] = currentJournal.reduce(function(accumulator, journal  ) {
                 if (journal.phaseName === phase.phaseName) {
                     return accumulator.concat(journal);
+                } else{
+                    return accumulator
                 }
             }, []);
             return accumulator.concat(phase)

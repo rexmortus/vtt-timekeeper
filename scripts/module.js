@@ -8,21 +8,9 @@ Handlebars.registerHelper('isLessThan', function(n1, n2, options) {
     return (n1 < n2) ? options.fn(this) : options.inverse(this);
 });
 
-// // Add "Add to Journal" option to chat message context menu
-// Hooks.on('getChatLogEntryContext', function(html, entries) {
-
-//     entries.push({
-//         name: " Add To Journal",
-//         icon: "✎",
-//         callback: function(menuItem, event) {
-//             Hooks.call('vtt-timekeeper.addJournal', {
-//                 type: "Note",
-//                 content: menuItem[0].outerText,
-//                 user: game.users.get(game.userId)
-//             })
-//         }
-//     })
-// })
+Handlebars.registerHelper('isEqualTo', function(n1, n2, options) {
+    return (n1 === n2) ? options.fn(this) : options.inverse(this);
+});
 
 Hooks.once('init', async function() {
 
@@ -42,6 +30,8 @@ Hooks.once('init', async function() {
     const mainForm = new TimekeeperApplicationForm(timekeeper, journalkeeper);
 
     // --- Setup the hooks --- //
+
+    // Pause
     Hooks.on('pauseGame', async function() {
         if (game.paused === true) {
             timekeeper.pause();
@@ -50,6 +40,7 @@ Hooks.once('init', async function() {
         }
     })
 
+    // Tick
     Hooks.on('vtt-timekeeper.tick', function(tick) {
         if (game.paused) {
             return
@@ -58,17 +49,32 @@ Hooks.once('init', async function() {
         }
     });
 
-    // Add the journal hooks
+    //  Journal notes
     Hooks.on('vtt-timekeeper.addJournal', function(entry) {
         journalkeeper.addEntry({
             type: entry.type,
             user: entry.user,
-            phaseName: "Morning",
             content: entry.content
         })
     });
+
+    // Rest
+    /*** 
+     * This hook only adds a journal entry. It does not automatically advance
+     * the gametime forward, because handling that is a little too complex
+     * with multiple players. The idea is that it's already quite simple for the GM
+     * to advance gametime manually, and they should just do that.
+    ***/
+    Hooks.on('dnd5e.restCompleted', function(actor, rest) {
+        let restType = rest.longRest ? 'Long Rest' : 'Short Rest'
+        journalkeeper.addEntry({
+            type: restType,
+            user: actor,
+            content: `${actor.name} takes a ${restType}`
+        })
+    });
     
-    // Binding the "Shift + T" key to open the window
+    // Opening the window
     game.keybindings.register("show-timekeeper", "show-timekeeper", {
         name: "Open the timekeeper window",
         hint: "Open the timekeeper window",
@@ -121,6 +127,8 @@ Hooks.on("chatCommandsReady", commands => {
         autocompleteCallback: (menu, alias, parameters) => [game.chatCommands.createInfoElement("Write a note in today's journal")],
         closeOnComplete: true
     });
+
+    
 
 });
 

@@ -10,15 +10,23 @@
 
         <ul class="circle" style="transform: rotate({{rotation}}deg)">
             {{#each allClicks}}
-              {{#isLessThan @index ../currentClickIndex }}
+              {{#isEqualTo ../currentClickIndex @index}}
               <li>
-                <div class="text disabled">{{ this }}</div>
+                <div class="text click now" data-clickIndex="{{@index}}">{{ this }}</div>
               </li>
-              {{else}}
+              {{else isEqualTo @index 0}}
               <li>
-                <div class="text">{{ this }}</div>
+                <div class="text click tomorrow" data-clickIndex="{{@index}}">{{ this }}</div>
               </li>
-              {{/isLessThan }}
+              {{else isLessThan @index ../currentClickIndex }}
+              <li>
+                <div class="text click past" data-clickIndex="{{@index}}">{{ this }}</div>
+              </li>
+              {{ else }}
+              <li>
+                <div class="text click future" data-clickIndex="{{@index}}">{{ this }}</div>
+              </li>
+              {{/isEqualTo }}
             {{/each}}
         <ul>
     </div>
