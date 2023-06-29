@@ -54,6 +54,7 @@ export class TimeKeeper {
 
         // Add a tick if the game isn't paused
         if (!this.paused) {
+            
             this.currentTicks += 1;
             game.settings.set('vtt-timekeeper', 'currentTicks', this.currentTicks)
             game.settings.set('vtt-timekeeper', 'currentClicks', this.currentClicks);
@@ -61,6 +62,7 @@ export class TimeKeeper {
 
         // Add a click (and reset ticks) if currentTicks = ticksPerClick
         if (this.currentTicks === this.ticksPerClick) {
+
             this.currentTicks = 0;
             game.settings.set('vtt-timekeeper', 'currentTicks', this.currentTicks)
 
@@ -69,8 +71,11 @@ export class TimeKeeper {
             game.settings.set('vtt-timekeeper', 'currentClicks', this.currentClicks);
         }
 
+        // Clean out the journal and write its contents to a compendium at the end of the day
+
         // Update the rotation
         this.currentRotation = this._updateRotation()
+
         
         // Send up the tick
         Hooks.call('vtt-timekeeper.tick', this);
@@ -133,7 +138,14 @@ export class TimeKeeper {
 
     // Get the current phase name
     getCurrentPhaseName() {
-        let phaseIndex = Math.ceil((this.getCurrentClickIndex() / this.getAllClicks().length) * this.getPhases().length) - 1;
+        
+        // Get the current phase
+        let phaseIndex = Math.floor((this.getCurrentClickIndex() / (this.getAllClicks().length - 1)) * this.getPhases().length);
+        
+        if (phaseIndex === this.getPhases().length) {
+            phaseIndex -= 1;
+        }
+        
         return this.calendar.phases[phaseIndex].phaseName;
     }
 
@@ -189,9 +201,7 @@ export class TimeKeeper {
 
     // Advance to the next day
     advanceToNextDay() {
-        this.currentTicks = 0;
-        this.currentClicks += this.allClicks.length - this.getCurrentClickIndex();
-        
+        Hooks.call('vtt-timekeeper.newDay', this);
     }
 
     // Convert a number into an ordinal

@@ -49,13 +49,22 @@ Hooks.once('init', async function() {
         }
     });
 
+    // On new day
+    Hooks.on('vtt-timekeeper.newDay', function(timekeeper) {
+        journalkeeper.writeCurrentJournalToEntry()
+        timekeeper.currentTicks = 0;
+        timekeeper.currentClicks += timekeeper.allClicks.length - timekeeper.getCurrentClickIndex()
+    });
+
     //  Journal notes
     Hooks.on('vtt-timekeeper.addJournal', function(entry) {
+
         journalkeeper.addEntry({
             type: entry.type,
             user: entry.user,
             content: entry.content
         })
+
     });
 
     // Rest
@@ -117,6 +126,7 @@ Hooks.on("chatCommandsReady", commands => {
         icon: "✎ ",
         requiredRole: "NONE",
         callback: function(chat, parameters, messageData) {
+
             Hooks.call('vtt-timekeeper.addJournal', {
                 type: "Note",
                 content: parameters,
