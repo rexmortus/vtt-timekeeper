@@ -41,9 +41,9 @@
       "path": "languages/en.json"
     }
   ],
-  "url": "",
-  "manifest": "",
-  "download": "",
+  "url": "#{URL}#",
+  "manifest": "#{MANIFEST}#",
+  "download": "#{DOWNLOAD}#",
   "license": "LICENSE",
   "readme": "README.md",
   "media": [
