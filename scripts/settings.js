@@ -1,28 +1,19 @@
 export const moduleName = "vtt-timekeeper";
 
 export const registerSettings = () => {
-    
-    game.settings.register(moduleName, 'phasesPerDay', {
-        name: 'Phases per day',
-        hint: 'Phases per day of gametime',
-        scope: 'world',
-        config: true,
-        type: Number,
-        default: 4,
-        onChange: (id) => {
-            console.log();
-        }
-    })
 
-    game.settings.register(moduleName, 'clicksPerDay', {
-        name: 'Clicks per day',
-        hint: 'Clicks per day of gametime',
-        scope: 'world',
+    game.settings.register(moduleName, 'calendar', { 
+        name: "Game Calendar",
+        hint: "Select the game calendar",
         config: true,
-        type: Number,
-        default: 12,
+        type: String,
+        choices: {
+            "harptos": "Harptos (Forgotten Realms)",
+            "absalom": "Absalom Reckoning (Pathfinder)"
+        },
+        default: "harptos",
         onChange: (id) => {
-            console.log();
+            console.log()
         }
     });
 

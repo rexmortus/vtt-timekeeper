@@ -19,7 +19,16 @@ Hooks.once('init', async function() {
 
     // --- Setup the TimeKeeper --- //
     // Have to load the calendar data here because you can't do await in a constructor??
-    const calendarReq = await fetch('/modules/vtt-timekeeper/harptos-calendar.json');
+
+    let calendarReq;
+    const calendarName = game.settings.get('vtt-timekeeper', 'calendar');
+
+    if (calendarName === 'harptos') {
+        calendarReq = await fetch('/modules/vtt-timekeeper/scripts/calendars/harptos-calendar.json');
+    } else {
+        calendarReq = await fetch('/modules/vtt-timekeeper/scripts/calendars/absalom.json');
+    }
+
     const calendarData = await calendarReq.json();
     const timekeeper = new TimeKeeper(calendarData);
 
@@ -106,11 +115,6 @@ Hooks.once('init', async function() {
 
     // --- Start the timekeeper --- //
     timekeeper.start();
-
-});
-
-Hooks.once('ready', async function() {
-    
 
 });
 

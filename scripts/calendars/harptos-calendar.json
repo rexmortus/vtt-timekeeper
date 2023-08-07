@@ -1,0 +1,97 @@
+{
+    "name": "Harptos",
+    "startingYear": 1487,
+    "currentEra": "DR",
+    "phases": [
+        {
+            "phaseName": "Twilight",
+            "icon": "🌌",
+            "light": "darkness",
+            "clicks": [
+                "Early Twilight",
+                "Middle Twilight",
+                "Late Twilight"
+            ]
+        },
+        {
+            "phaseName": "Morning",
+            "icon": "🌄",
+            "light": "daylight",
+            "clicks": [
+                "Early Morning",
+                "Middle Morning",
+                "Late Morning"
+            ]
+        },
+        {
+            "phaseName": "Afternoon",
+            "icon": "☀️",
+            "light": "daylight",
+            "clicks": [
+                "Early Afternoon",
+                "Middle Afternoon",
+                "Late Afternoon"
+            ]
+        },
+        {
+            "phaseName": "Evening",
+            "icon": "🌗",
+            "light": "darkness",
+            "clicks": [
+                "Early Evening",
+                "Middle Evening",
+                "Late Evening"
+            ]
+        }
+    ],
+    "months": [
+        {
+            "monthName": "Hammer (Deepwinter)",
+            "days": 30
+        },
+        {
+            "monthName": "Alturiak (The Claw of Winter)",
+            "days": 30
+        },
+        {
+            "monthName": "Ches (The Claw of Sunsets)",
+            "days": 30
+        },
+        {
+            "monthName": "Tarsakh (The Claw of Storms)",
+            "days": 30
+        },
+        {
+            "monthName": "Mirtul (The Melting)",
+            "days": 30
+        },
+        {
+            "monthName": "Kythorn (The Time of Flowers)",
+            "days": 30
+        },
+        {
+            "monthName": "Flamerule (Summertide)",
+            "days": 30
+        },
+        {
+            "monthName": "Eleasias (Highsun)",
+            "days": 30
+        },
+        {
+            "monthName": "Eleint (The Fading)",
+            "days": 30
+        },
+        {
+            "monthName": "Marpentoh (Leaffal)",
+            "days": 30
+        },
+        {
+            "monthName": "Uktar (The Rotting)",
+            "days": 30
+        },
+        {
+            "monthName": "Nightal (The Drawing Donw)",
+            "days": 30
+        }
+    ]
+}

@@ -73,9 +73,7 @@ export class JournalKeeper {
         {{/each}}
         </div>
         `
-
-        debugger;
-
+        
         let template = Handlebars.compile(html);
 
         // Create the new JournalEntry

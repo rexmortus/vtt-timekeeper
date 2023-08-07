@@ -3,7 +3,7 @@ export class TimeKeeper {
     constructor(calendarData) {
 
         // Configuration
-        this.ticksPerClick = calendarData.realtimePerClick * 60;
+        this.ticksPerClick = game.settings.get('vtt-timekeeper', 'realtimePerClick') * 60;
         this.clicksPerDay = calendarData.phases.reduce(function(accumulator, object) {
             return accumulator + object.clicks.length
         }, 0);
@@ -171,7 +171,7 @@ export class TimeKeeper {
 
     // Get the current day
     getCurrentDay() {
-        return Math.round((((this.startingClicks + this.currentClicks) % this.clicksPerYear / this.clicksPerYear) * this.totalDaysPerYear) % (this.totalDaysPerYear / this.allMonths.length)) + 1
+        return Math.floor((((this.startingClicks + this.currentClicks) % this.clicksPerYear / this.clicksPerYear) * this.totalDaysPerYear) % (this.totalDaysPerYear / this.allMonths.length)) + 1
     }
 
     // Get the current day as an orindal
