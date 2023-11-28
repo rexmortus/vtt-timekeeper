@@ -1,7 +1,6 @@
 import { registerSettings, moduleName } from './settings.js';
 import { TimekeeperApplicationForm } from './lib/forms/TimekeeperApplicationForm/TimekeeperApplicationForm.js'
 import { TimeKeeper } from './lib/timekeeper.js';
-import { JournalKeeper } from './lib/journalkeeper.js';
 
 // Register handlebars helpers
 Handlebars.registerHelper('isLessThan', function(n1, n2, options) {
@@ -30,66 +29,44 @@ Hooks.once('init', async function() {
     }
 
     const calendarData = await calendarReq.json();
-    const timekeeper = new TimeKeeper(calendarData);
-
-    // --- Setup the JournalKeeper --- //
-    const journalkeeper = new JournalKeeper(game.settings.get(moduleName, 'currentJournal'), timekeeper);
+    const timekeeper = new TimeKeeper(calendarData, SimpleCalendar.api);
 
     // --- Setup the main form --- //
-    const mainForm = new TimekeeperApplicationForm(timekeeper, journalkeeper);
-
-    // --- Setup the hooks --- //
-
-    // Pause
-    Hooks.on('pauseGame', async function() {
-        if (game.paused === true) {
-            timekeeper.pause();
-        } else {
-            timekeeper.resume();
-        }
-    })
+    const mainForm = new TimekeeperApplicationForm(timekeeper);
 
     // Tick
     Hooks.on('vtt-timekeeper.tick', function(tick) {
-        if (game.paused) {
-            return
-        } else {
-            mainForm.render(false);
-        }
+        mainForm.render(false);
     });
 
-    // On new day
-    Hooks.on('vtt-timekeeper.newDay', function(timekeeper) {
-        journalkeeper.writeCurrentJournalToEntry()
-        timekeeper.currentTicks = 0;
-        timekeeper.currentClicks += timekeeper.allClicks.length - timekeeper.getCurrentClickIndex()
-    });
+    // --- Register chat journalling functions --- //
+    Hooks.on("chatCommandsReady", commands => {
 
-    //  Journal notes
-    Hooks.on('vtt-timekeeper.addJournal', function(entry) {
+        // Add a note
+        commands.register({
+            name: "/note",
+            module: "_chatcommands",
+            aliases: ["/n"],
+            description: "Write a note in today's journal",
+            icon: "✎ ",
+            requiredRole: "NONE",
+            callback: function(chat, parameters, messageData) {
 
-        journalkeeper.addEntry({
-            type: entry.type,
-            user: entry.user,
-            content: entry.content
-        })
+                if (parameters) {
+                    let user = game.users.get(messageData.user);
+                    let title = `${user.name} at ${SimpleCalendar.api.currentDateTimeDisplay().time}` 
+                    SimpleCalendar.api.addNote(title, parameters, {}, {}, true, SimpleCalendar.api.NoteRepeat.Never, ['Notes']);
+                    return { content: `added a note to the journal: <blockquote>${parameters}</blockquote>` }
+                } else {
+                    ui.notifications.info("There was no journal content");
+                }
 
-    });
+                 
+            },
+            autocompleteCallback: (menu, alias, parameters) => [game.chatCommands.createInfoElement("Write a note in today's journal")],
+            closeOnComplete: true
+        });
 
-    // Rest
-    /*** 
-     * This hook only adds a journal entry. It does not automatically advance
-     * the gametime forward, because handling that is a little too complex
-     * with multiple players. The idea is that it's already quite simple for the GM
-     * to advance gametime manually, and they should just do that.
-    ***/
-    Hooks.on('dnd5e.restCompleted', function(actor, rest) {
-        let restType = rest.longRest ? 'Long Rest' : 'Short Rest'
-        journalkeeper.addEntry({
-            type: restType,
-            user: actor,
-            content: `${actor.name} takes a ${restType}`
-        })
     });
     
     // Opening the window
@@ -117,33 +94,3 @@ Hooks.once('init', async function() {
     timekeeper.start();
 
 });
-
-// --- Register chat journalling functions --- //
-Hooks.on("chatCommandsReady", commands => {
-
-    // Add a note
-    commands.register({
-        name: "/note",
-        module: "_chatcommands",
-        aliases: ["/n"],
-        description: "Write a note in today's journal",
-        icon: "✎ ",
-        requiredRole: "NONE",
-        callback: function(chat, parameters, messageData) {
-
-            Hooks.call('vtt-timekeeper.addJournal', {
-                type: "Note",
-                content: parameters,
-                user: game.users.get(messageData.user)
-            })
-            return { content: `added a note to the journal: <blockquote>${parameters}</blockquote>` } 
-        },
-        autocompleteCallback: (menu, alias, parameters) => [game.chatCommands.createInfoElement("Write a note in today's journal")],
-        closeOnComplete: true
-    });
-
-    
-
-});
-
-

@@ -1,6 +1,7 @@
 #vtt-timekeeper > section {
     color: white;
     background: rgba(1, 1, 1, 0.65);
+    overflow: hidden;
 }
 
 #vtt-timekeeper > section > li > div:nth-child(1) > img {
@@ -10,10 +11,20 @@
     margin-right: auto;
 }
 
+.smallButton {
+  font-size: large;
+  max-width: 40px;
+  height: 32px;
+  background: none !important;
+  border: none !important;
+}
+
 .indicator {
     position: absolute;
-    left: 224px;
+    left: 319px;
+    text-shadow: black 1px 1px 1px;
     z-index: 10000;
+    font-size: xx-large;
 }
 
 .pause-resume {
@@ -31,12 +42,13 @@
 .circle {
     overflow:hidden;
     position: relative;
-    border: 0.5px solid rgb(255, 255, 255);
     margin: 20px;
-    width: 400px; height: 400px;
+    width: 600px; 
+    height: 600px;
     border-radius: 50%;
     list-style: none; 
-    transition: all 0.1s ease-in-out 0.1s;
+    transition: rotation 0.1s ease-in-out 0.1s;
+    background: url('/modules/vtt-timekeeper/images/wheel.png') 0 0 no-repeat;
 }
 .circle > li {
     overflow: hidden;
@@ -46,11 +58,13 @@
     width: 50%;
     height: 50%;
     transform-origin: 0% 100%;
-    border: 0.5px solid rgba(255, 255, 255);
+    border: 0.5px solid rgba(255, 255, 255, 0.25);
 
   }
   .circle > li > .text {
-    font-size: 10px;
+    font-size: 12px;
+    background-color: rgba(1, 1, 1, 0.65);
+    border-radius: 6px;
     font-weight: bold;
     position: absolute;
     left: -100%;
@@ -66,43 +80,41 @@
 
   /* Past */
   .circle > li > div.text.past {
-    color:white;
+    color:rgba(255, 255, 255, 0.55);
     background: rgba(0, 0, 0, 0.15) !important;
   }
 
   .circle > li > div.text.past:hover {
-    color: ;
-    background: rgba(255, 255, 255, 0.25) !important;
   }
 
   /* Future */
   .circle > li > div.text.future {
     color:white;
-    background: rgba(255, 255, 255, 0.35) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
   }
 
   .circle > li > div.text.future:hover {
     color: white;
     text-decoration: underline;
     cursor: "➡️";
-    background: rgba(179, 240, 255, 0.35) !important;
+    background: rgba(179, 240, 255, 0.15) !important;
   }
 
   /* Now */
   .circle > li > div.text.now {
     color:rgb(255, 255, 255);
-    background: rgba(179, 240, 255, 0.25) !important;
+    background: rgba(179, 240, 255, 0.15) !important;
   }
 
   .circle > li > div.text.now:hover {
     color: white;
-    background: rgba(179, 240, 255, 0.35) !important;
+    background: rgba(179, 240, 255, 0.15) !important;
   }
 
   /* Tomorrow */
   .circle > li > div.text.tomorrow {
     color:rgb(255, 255, 255);
-    background: rgba(255, 255, 255, 0.25) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
   }
 
   .circle > li > div.text.tomorrow:hover {

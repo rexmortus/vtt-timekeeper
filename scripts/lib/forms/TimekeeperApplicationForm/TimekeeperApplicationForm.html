@@ -1,16 +1,22 @@
-<li class="flexrow">
+<li class="flexrow" style="max-height: fit-content;">
 
     <div>
-        <h2 style="text-align: center;"><span> {{currentDay}}  of {{currentMonth}}, {{currentYear}} {{currentEra}}</span><br>
-          <label for="file"><small> {{currentClickName}}</small></label>
-          <small><progress id="file" max="{{ticksPerClick}}" value="{{ticks}}"> </progress> <span style="color:grey">⧖ {{ticks}} / {{ticksPerClick}}</span></small>
+      <div class="flexrow">
+        <button class="smallButton" id="openSimpleCalendar">📆</button>
+        <h2 style="text-align: center;">
+          <span> {{ data.date }}{{ data.yearPostfix }} </span><br>
+          <label for="file"><small> {{currentSegmentName}}</small></label>
+          <small><progress id="file" max="{{secondsPerSegment}}" value="{{secondsInCurrentSegment}}"> </progress> <span style="color:grey">{{ data.time }}</span></small>
         </h2>
+        <button class="smallButton" id="gametimeToggle">⏯️</button>
+      </div>
+        
         
         <span class="indicator">⬇</span>
 
         <ul class="circle" style="transform: rotate({{rotation}}deg)">
-            {{#each allClicks}}
-              {{#isEqualTo ../currentClickIndex @index}}
+            {{#each allSegments}}
+              {{#isEqualTo ../currentSegmentIndex @index}}
               <li>
                 <div class="text click now" data-clickIndex="{{@index}}">{{ this }}</div>
               </li>
@@ -18,7 +24,7 @@
               <li>
                 <div class="text click tomorrow" data-clickIndex="{{@index}}">{{ this }}</div>
               </li>
-              {{else isLessThan @index ../currentClickIndex }}
+              {{else isLessThan @index ../currentSegmentIndex }}
               <li>
                 <div class="text click past" data-clickIndex="{{@index}}">{{ this }}</div>
               </li>
@@ -30,17 +36,4 @@
             {{/each}}
         <ul>
     </div>
-
-    <div style="overflow: scroll;">
-          {{#each currentJournalEntries}}
-          <h3>{{this.icon}} {{this.phaseName}}</h3>
-          <ul>
-            {{#each this.journals}}
-              <li>{{this.user}} - {{this.type}}<br>
-              <blockquote>{{this.content}}</blockquote></li>
-            {{/each}}
-          </ul>
-          {{/each}}
-    </div>
-    
 </li>

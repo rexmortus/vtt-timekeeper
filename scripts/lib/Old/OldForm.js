@@ -1,9 +1,10 @@
 export class TimekeeperApplicationForm extends FormApplication {
 
     // The constructor needs both the timekeeper and journalkeeper
-    constructor(timekeeper) {
+    constructor(timekeeper, journalkeeper) {
         super();
         this.timekeeper = timekeeper
+        this.journalkeeper = journalkeeper
     }
 
     static get defaultOptions() {
@@ -13,8 +14,8 @@ export class TimekeeperApplicationForm extends FormApplication {
             template: "./modules/vtt-timekeeper/scripts/lib/forms/TimekeeperApplicationForm/TimekeeperApplicationForm.html",
             id: "vtt-timekeeper",
             title: "VTT Timekeeper",
-            height: 750,
-            width: 660,
+            height: 740,
+            width: 1000,
             minimizable: true,
             classes: ["vtt-timekeeper"]
         });
@@ -24,44 +25,37 @@ export class TimekeeperApplicationForm extends FormApplication {
 
         // Create an object that is passed to the view template
         return {
-            data: this.timekeeper.api.currentDateTimeDisplay(),
-            secondsInCurrentSegment: this.timekeeper.getSecondsInCurrentSegment(),
-            secondsPerSegment: this.timekeeper.getSecondsPerSegment(),
-            secondsInCurrentSegment: this.timekeeper.getSecondsInCurrentSegment(),
-            allSegments: this.timekeeper.getAllSegments(),
-            currentSegmentIndex: this.timekeeper.getCurrentSegmentIndex(),
-            currentSegmentName: this.timekeeper.getCurrentSegmentName(),
+            ticks: this.timekeeper.getTicks(),
+            clicks: this.timekeeper.getCurrentClicks(),
+            ticksPerClick: this.timekeeper.getTicksPerClick(),
+            calendarMonths: this.timekeeper.getCalendarMonths(),
+            allClicks: this.timekeeper.getAllClicks(),
+            currentClickIndex: this.timekeeper.getCurrentClickIndex(),
+            currentClickName: this.timekeeper.getCurrentClickName(),
+            currentDay: this.timekeeper.getCurrentDayAsOrdinal(),
+            currentMonth: this.timekeeper.getCurrentMonth(),
+            currentYear: this.timekeeper.getCurrentYear(),
+            currentEra: this.timekeeper.getCurrentEra(),
             rotation: this.timekeeper.getRotation(),
+            currentJournalEntries: this.journalkeeper.getJournalEntries()
         };
     }
 
     activateListeners(html) {
-
-        const openSimpleCalendarButton = html.find('#openSimpleCalendar');
-
-        openSimpleCalendarButton.on("click", function(event, object) {
-            SimpleCalendar.api.showCalendar();
-        });
-
-        const gametimeToggle = html.find("#gametimeToggle");
-
-        gametimeToggle.on("click", function(event, object) {
-            SimpleCalendar.api.startClock();
-        })
-
-        // Get all segments
-        const segments = html.find(".click");
+        
+        // Get all ticks
+        const clicks = html.find(".click");
 
         // Attach click listeners 
         // TODO attach to the parent item
         // TODO Otherwise, I think that when a segment passes from being future to past, it will still have a click listener attached?
-        segments.on("click", function(event, object) {
+        clicks.on("click", function(event, object) {
 
             // Get the target click index
             let targetIndex = $(event.target).data().clickindex
 
             // Get the current click index
-            let currentIndex = this.timekeeper.getCurrentSegmentIndex();
+            let currentIndex = this.timekeeper.getCurrentClickIndex();
 
             // That's now!
             if (targetIndex ===  currentIndex) {
@@ -97,8 +91,8 @@ export class TimekeeperApplicationForm extends FormApplication {
                     buttons: {
                         one: {
                             icon: '<i class="fas fa-rotate-right"></i>',
-                            label: `${this.timekeeper.getAllSegments()[targetIndex]}`,
-                            callback: () => this.timekeeper.advanceToSegment(targetIndex)
+                            label: `${this.timekeeper.getAllClicks()[targetIndex]}`,
+                            callback: () => this.timekeeper.advanceToClick(targetIndex)
                         },
                         two: {
                             icon: '<i class="fas fa-cancel"></i>',

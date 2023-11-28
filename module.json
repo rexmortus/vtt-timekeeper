@@ -19,11 +19,19 @@
   ],
   "dependencies": [{
     "name": "_chatcommands"
-  }],
+  },
+  {
+    "name": "foundryvtt-simple-calendar"
+  }
+  ],
   "relationships": {
     "requires": [{
       "id": "_chatcommands"
-    }]
+    },
+    {
+      "id": "foundryvtt-simple-calendar"
+    }
+  ]
   },
   "esmodules": [
     "scripts/module.js"

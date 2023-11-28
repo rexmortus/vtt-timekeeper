@@ -1,48 +1,27 @@
 export class TimeKeeper {
 
-    constructor(calendarData) {
+    constructor(calendarData, api) {
+
+        this.api = api;
 
         // Configuration
-        this.ticksPerClick = game.settings.get('vtt-timekeeper', 'realtimePerClick') * 60;
-        this.clicksPerDay = calendarData.phases.reduce(function(accumulator, object) {
+        this.timeConfig = this.api.getTimeConfiguration()
+        this.secondsInMinute = this.timeConfig.secondsInMinute
+        this.minutesInHour = this.timeConfig.minutesInHour;
+        this.totalSecondsInDay = this.timeConfig.secondsInMinute * this.timeConfig.minutesInHour * this.timeConfig.hoursInDay
+        this.degreesPerSecond = 360 / this.totalSecondsInDay;
+        this.segmentsPerDay = calendarData.phases.reduce(function(accumulator, object) {
             return accumulator + object.clicks.length
         }, 0);
 
-        // Load the state from settings
-        this.currentTicks = game.settings.get('vtt-timekeeper', 'currentTicks');
-        this.currentClicks = game.settings.get('vtt-timekeeper', 'currentClicks');
-        this.paused = game.paused;
+        this.secondsPerSegment = this.totalSecondsInDay / this.segmentsPerDay;    
 
-        // Initial Rotation
-        this.rotationDegreesPerTick = this.ticksPerClick * this.clicksPerDay / 360;
         this.currentRotation = this._updateRotation();
 
-        // Load / build calendar data
         this.calendar = calendarData;
-        
-        // The current Era
-        this.currentEra = calendarData.currentEra;
-
-        // The starting year (add this to the currentClicks)
-        this.startingYear = this.calendar.startingYear;
-        this.totalDaysPerYear = this.calendar.months.reduce(function(accumulator, object) {
-            return accumulator + object.days 
-        }, 0);
-        this.startingClicks = this.startingYear * this.totalDaysPerYear * this.clicksPerDay;
-
-        // Convenience for looking up current click
-        this.allClicks = this.calendar.phases.reduce(function(accumulator, phase) {
+        this.allSegments = this.calendar.phases.reduce(function(accumulator, phase) {
             return accumulator.concat(phase.clicks);
         }, []);
-
-        // Clicks per year
-        this.clicksPerYear = this.totalDaysPerYear * this.clicksPerDay;
-
-        // Clicks per month
-        this.allMonths = this.calendar.months.reduce(function(accumulator, object) {
-            return accumulator.concat(object.monthName);
-        }, []);
-        this.clicksPerMonth = this.clicksPerYear / this.allMonths.length;
 
     }
 
@@ -52,43 +31,11 @@ export class TimeKeeper {
 
     tick() {
 
-        // Add a tick if the game isn't paused
-        if (!this.paused) {
-            
-            this.currentTicks += 1;
-            game.settings.set('vtt-timekeeper', 'currentTicks', this.currentTicks)
-            game.settings.set('vtt-timekeeper', 'currentClicks', this.currentClicks);
-        }
-
-        // Add a click (and reset ticks) if currentTicks = ticksPerClick
-        if (this.currentTicks === this.ticksPerClick) {
-
-            this.currentTicks = 0;
-            game.settings.set('vtt-timekeeper', 'currentTicks', this.currentTicks)
-
-            let currentClicks = game.settings.get('vtt-timekeeper', 'currentClicks');
-            this.currentClicks = currentClicks + 1;
-            game.settings.set('vtt-timekeeper', 'currentClicks', this.currentClicks);
-        }
-
-        // Clean out the journal and write its contents to a compendium at the end of the day
-
         // Update the rotation
         this.currentRotation = this._updateRotation()
-
         
         // Send up the tick
         Hooks.call('vtt-timekeeper.tick', this);
-    }
-
-    // Pause the timekeeper
-    pause() {
-        this.paused = true;
-    }
-
-    // Resume the timekeeper
-    resume() {
-        this.paused = false;
     }
 
     // Get the current rotation of the main clock
@@ -97,13 +44,13 @@ export class TimeKeeper {
     }
 
     // Get the current number of ticks
-    getTicks() {
-        return this.currentTicks;
+    getSecondsInCurrentSegment() {
+        return this.getCurrentSeconds() % this.secondsPerSegment;
     }
 
     // Get the number of ticks per click
-    getTicksPerClick() {
-        return this.ticksPerClick;
+    getSecondsPerSegment() {
+        return this.secondsPerSegment;
     }
 
     // Get the number of clicks in the current day
@@ -112,13 +59,21 @@ export class TimeKeeper {
     }
 
     // Get all the clicks in the current day
-    getAllClicks() {
-        return this.allClicks;
+    getAllSegments() {
+        return this.allSegments;
+    }
+
+    getCurrentSeconds() {
+        let dateTime = this.api.currentDateTime();
+        let secondsFromHours = dateTime.hour * this.minutesInHour * this.secondsInMinute;
+        let secondsFromMinutes = dateTime.minute * this.secondsInMinute;
+        let seconds = dateTime.seconds;
+        return seconds + secondsFromMinutes + secondsFromHours;
     }
 
     // Update the rotation of the main clock
     _updateRotation() {
-        return -(((this.currentClicks % this.clicksPerDay) * this.ticksPerClick) + (this.currentTicks)) / (this.ticksPerClick * this.clicksPerDay) * 360;
+        return -(this.getCurrentSeconds() * this.degreesPerSecond);
     }
 
     // Set the calendar
@@ -140,7 +95,7 @@ export class TimeKeeper {
     getCurrentPhaseName() {
         
         // Get the current phase
-        let phaseIndex = Math.floor((this.getCurrentClickIndex() / (this.getAllClicks().length - 1)) * this.getPhases().length);
+        let phaseIndex = Math.floor((this.getCurrentSegmentIndex() / (this.getAllSegments().length - 1)) * this.getPhases().length);
         
         if (phaseIndex === this.getPhases().length) {
             phaseIndex -= 1;
@@ -149,54 +104,23 @@ export class TimeKeeper {
         return this.calendar.phases[phaseIndex].phaseName;
     }
 
-    // Get the current era
-    getCurrentEra() {
-        return this.currentEra;
-    }
-
-    // Get the months of the calendar
-    getCalendarMonths() {
-        return this.calendar.months;
-    }
-
-    // Get the current year
-    getCurrentYear() {      
-        return Math.round((this.startingClicks + this.currentClicks) / this.clicksPerYear);
-    }
-
-    // Get the current month
-    getCurrentMonth() {
-        return this.allMonths[Math.round((((this.startingClicks + this.currentClicks) % this.clicksPerYear) / this.clicksPerYear) * this.allMonths.length)]
-    }
-
-    // Get the current day
-    getCurrentDay() {
-        return Math.floor((((this.startingClicks + this.currentClicks) % this.clicksPerYear / this.clicksPerYear) * this.totalDaysPerYear) % (this.totalDaysPerYear / this.allMonths.length)) + 1
-    }
-
-    // Get the current day as an orindal
-    getCurrentDayAsOrdinal() {
-        return this._getOrdinal(this.getCurrentDay())
-    }
-
     // Get the index of the current click
-    getCurrentClickIndex() {
-        return (this.startingClicks + this.currentClicks) % this.clicksPerDay;
+    getCurrentSegmentIndex() {
+        return -Math.floor(this.currentRotation / 30) - 1;
     }
 
     // Get the current click name
-    getCurrentClickName() {
-        return this.allClicks[(this.startingClicks + this.currentClicks) % this.clicksPerDay];
+    getCurrentSegmentName() {
+        return this.allSegments[-Math.floor(this.currentRotation / 30) - 1];
     }
 
     // Advance the gametime to a specified click
-    advanceToClick(clickIndex) {
-        // Get the difference between the current click and the proposed click
-        let clickDifference = Math.abs(this.getCurrentClickIndex() - clickIndex);
+    advanceToSegment(segmentIndex) {
 
-        // Reset ticks to 0
-        this.currentTicks = 0;
-        this.currentClicks = this.currentClicks + clickDifference;
+        // Get the difference between the current click and the proposed segment
+        let segmentDifference = Math.abs(this.getCurrentSegmentIndex() - segmentIndex);
+
+        this.api.setDate({seconds: 0, minute: 0, hour: (segmentIndex * this.secondsPerSegment) / this.secondsInMinute / this.minutesInHour})
     }
 
     // Advance to the next day
