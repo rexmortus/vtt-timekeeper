@@ -48,7 +48,7 @@
     border-radius: 50%;
     list-style: none; 
     transition: rotation 0.1s ease-in-out 0.1s;
-    background: url('/modules/vtt-timekeeper/images/wheel.png') 0 0 no-repeat;
+    background: url('https://i.imgur.com/v2l3Sda.png') 0 0 no-repeat;
 }
 .circle > li {
     overflow: hidden;
