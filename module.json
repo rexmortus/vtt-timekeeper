@@ -2,7 +2,7 @@
   "id": "vtt-timekeeper",
   "title": "VTT Timekeeper",
   "description": "",
-  "version": "0.0.1",
+  "version": "#{VERSION}#",
   "library": "false",
   "manifestPlusVersion": "1.2.0",
   "compatibility": {
