@@ -16,23 +16,23 @@
 
         <ul class="circle" style="transform: rotate({{rotation}}deg)">
             {{#each allSegments}}
-              {{#isEqualTo ../currentSegmentIndex @index}}
+              {{#equals ../currentSegmentIndex @index}}
               <li>
-                <div class="text click now" data-clickIndex="{{@index}}">{{ this }}</div>
+                <div class="text click now" data-clickIndex="{{@index}}"><span>{{ this }}</span></div>
               </li>
-              {{else isEqualTo @index 0}}
+              {{else equals @index 0}}
               <li>
-                <div class="text click tomorrow" data-clickIndex="{{@index}}">{{ this }}</div>
+                <div class="text click tomorrow" data-clickIndex="{{@index}}"><span>{{ this }}</span></div>
               </li>
               {{else isLessThan @index ../currentSegmentIndex }}
               <li>
-                <div class="text click past" data-clickIndex="{{@index}}">{{ this }}</div>
+                <div class="text click past" data-clickIndex="{{@index}}"><span>{{ this }}</span></div>
               </li>
               {{ else }}
               <li>
-                <div class="text click future" data-clickIndex="{{@index}}">{{ this }}</div>
+                <div class="text click future" data-clickIndex="{{@index}}"><span>{{ this }}</span></div>
               </li>
-              {{/isEqualTo }}
+              {{/equals }}
             {{/each}}
         <ul>
     </div>
